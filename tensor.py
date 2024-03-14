@@ -5,6 +5,7 @@ import glob
 from tensorflow import keras
 from tensorflow.keras import layers
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix, precision_score, recall_score
 
 # Function to load and preprocess images
 def load_data(path):
@@ -60,6 +61,32 @@ def train_model(model, train_data, train_labels, test_data, test_labels):
 def evaluate_model(model, test_data, test_labels):
     loss, accuracy = model.evaluate(test_data, test_labels)
     print(f'Test loss: {loss}, Test accuracy: {accuracy}')
+
+    # Predict labels for the test data
+    predicted_labels = model.predict(test_data)
+    predicted_labels = (predicted_labels > 0.5).astype(np.int32)
+
+    # Calculate confusion matrix
+    conf_matrix = confusion_matrix(test_labels, predicted_labels)
+    print("Confusion Matrix:")
+    print(conf_matrix)
+
+    # Calculate precision and recall
+    precision = precision_score(test_labels, predicted_labels)
+    recall = recall_score(test_labels, predicted_labels)
+
+    print("Precision:", precision)
+    print("Recall:", recall)
+
+    # Display results in tabular format
+    print("\nResults:")
+    print("--------------")
+    print("| Metric     | Value   |")
+    print("|------------|---------|")
+    print(f"| Accuracy   | {accuracy:.4f} |")
+    print(f"| Precision  | {precision:.4f} |")
+    print(f"| Recall     | {recall:.4f} |")
+    print("--------------")
 
 # Load data
 train_data, test_data, train_labels, test_labels = load_data('dataset')
