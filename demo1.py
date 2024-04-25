@@ -5,7 +5,22 @@ from tensorflow.keras.models import load_model
 # Load the trained model
 model = load_model('tomato_model.h5')
 
+# Known width of a ripe tomato in centimeters
+KNOWN_WIDTH = 5.0  # Adjust according to your ripe tomato's actual width
+
+# Focal length of the camera in pixels (this should be calibrated for your specific setup)
+FOCAL_LENGTH = 800  # Example value; adjust as per calibration
+
+def calculate_distance(focal_length, known_width, pixel_width):
+    """
+    Calculate the distance to the detected object.
+    """
+    return (known_width * focal_length) / pixel_width
+
 def detect_ripe_tomatoes(frame, model):
+    """
+    Detect ripe tomatoes in the frame and display the ripeness percentage and distance.
+    """
     # Convert the frame to the HSV color space
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
@@ -30,25 +45,30 @@ def detect_ripe_tomatoes(frame, model):
             x, y, w, h = cv2.boundingRect(contour)
             cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
+            # Calculate the distance to the tomato
+            distance = calculate_distance(FOCAL_LENGTH, KNOWN_WIDTH, w)
+
+            # Display the distance on the frame
+            cv2.putText(frame, f"Distance: {distance:.2f} cm", (x, y - 25), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
+
             # Extract the tomato from the frame and resize it to the size the model expects
-            tomato = frame[y:y+h, x:x+w]
+            tomato = frame[y:y + h, x:x + w]
             tomato = cv2.resize(tomato, (224, 224))
 
-            # Normalize the image to 0-1 range
+            # Normalize the image to a range of 0-1
             tomato = tomato / 255.0
 
             # Add an extra dimension for the batch size
             tomato = np.expand_dims(tomato, axis=0)
 
-            # Use the model to predict whether the tomato is ripe or unripe
+            # Use the model to predict the ripeness percentage
             prediction = model.predict(tomato)[0][0]
 
-            # The prediction is a number between 0 and 1 due to the sigmoid activation function
-            # We can convert this to a binary label
-            label = "Ripe" if prediction > 0.5 else "Unripe"
+            # Convert the prediction to a ripeness percentage (0-100%)
+            ripeness_percentage = prediction * 100
 
-            # Draw the label on the frame
-            cv2.putText(frame, label, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36,255,12), 2)
+            # Draw the ripeness percentage on the frame
+            cv2.putText(frame, f"Ripeness: {ripeness_percentage:.2f}%", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36, 255, 12), 2)
 
     # Display the result
     cv2.imshow("Ripe Tomato Detection", frame)
