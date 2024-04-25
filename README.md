@@ -12,13 +12,13 @@ This project is an application that uses a machine learning model to classify to
 1. Clone this repository:
 
    ```plaintext
-   git clone https://github.com/your-repo-url.git
+   git clone https://github.com/strawhatrag/demo.git
    ```
 
 2. Navigate to the project directory:
 
    ```plaintext
-   cd your-repo-url
+   cd demo
    ```
 
 3. Install the required packages:
@@ -37,7 +37,7 @@ This project is an application that uses a machine learning model to classify to
 1. Run the script to train and evaluate the model:
 
    ```plaintext
-   python your_script.py
+   python demo1.py
    ```
 
 2. The script will load the data, create the model, train it, and evaluate it on the test data.
@@ -51,10 +51,6 @@ After running the script, the results including accuracy, precision, recall, and
 ## License
 
 This project is open-source and available under the MIT License.
-
-## Author
-
-- [Your Name](https://your-profile-url)
 
 ## Acknowledgements
 
