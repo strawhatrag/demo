@@ -6,21 +6,12 @@ from tensorflow.keras.models import load_model
 model = load_model('tomato_model.h5')
 
 # Known width of a ripe tomato in centimeters
-KNOWN_WIDTH = 5.0  # Adjust according to your ripe tomato's actual width
+KNOWN_WIDTH = 6.0  # Adjust according to your ripe tomato's actual width
 
 # Focal length of the camera in pixels (this should be calibrated for your specific setup)
 FOCAL_LENGTH = 800  # Example value; adjust as per calibration
 
-def calculate_distance(focal_length, known_width, pixel_width):
-    """
-    Calculate the distance to the detected object.
-    """
-    return (known_width * focal_length) / pixel_width
-
 def detect_ripe_tomatoes(frame, model):
-    """
-    Detect ripe tomatoes in the frame and display the ripeness percentage and distance.
-    """
     # Convert the frame to the HSV color space
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
@@ -61,17 +52,21 @@ def detect_ripe_tomatoes(frame, model):
             # Add an extra dimension for the batch size
             tomato = np.expand_dims(tomato, axis=0)
 
-            # Use the model to predict the ripeness percentage
+            # Use the model to predict whether the tomato is ripe or unripe
             prediction = model.predict(tomato)[0][0]
 
-            # Convert the prediction to a ripeness percentage (0-100%)
-            ripeness_percentage = prediction * 100
+            # Convert the prediction to a binary label
+            label = "Ripe" if prediction > 0.5 else "Unripe"
 
-            # Draw the ripeness percentage on the frame
-            cv2.putText(frame, f"Ripeness: {ripeness_percentage:.2f}%", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36, 255, 12), 2)
+            # Draw the label on the frame
+            cv2.putText(frame, label, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36, 255, 12), 2)
 
     # Display the result
     cv2.imshow("Ripe Tomato Detection", frame)
+
+# Function to calculate the distance to the object
+def calculate_distance(focal_length, known_width, pixel_width):
+    return (known_width * focal_length) / pixel_width
 
 # Open a connection to the webcam (camera index 0 by default)
 cap = cv2.VideoCapture(0)
